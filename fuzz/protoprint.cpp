@@ -159,6 +159,8 @@ static const std::string kNames[] = {
     "wrap",
     "xpcall",
     "yield",
+    "write",
+    "read",
 };
 
 static const std::string kTypes[] = {

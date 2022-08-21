@@ -126,6 +126,9 @@ LUALIB_API int luaopen_utf8(lua_State* L);
 #define LUA_MATHLIBNAME "math"
 LUALIB_API int luaopen_math(lua_State* L);
 
+#define LUA_BADGRLIBNAME "badgr"
+LUALIB_API int luaopen_badgr(lua_State* L);
+
 #define LUA_DBLIBNAME "debug"
 LUALIB_API int luaopen_debug(lua_State* L);
 

@@ -10,6 +10,8 @@
 #include "ldo.h"
 
 #include <math.h>
+#include <stdio.h>
+
 
 #ifdef _MSC_VER
 #include <intrin.h>
@@ -1138,6 +1140,29 @@ static int luauF_rawlen(lua_State* L, StkId res, TValue* arg0, int nresults, Stk
     return -1;
 }
 
+static int luauF_badgr_read(lua_State* L, StkId res, TValue* arg0, int nresults, StkId args, int nparams) {
+    if (nparams == 1 && nresults <= 1 && ttisstring(arg0))
+    {
+        return 1;
+        
+    }
+    return -1;
+}
+
+static int luauF_badgr_write(lua_State* L, StkId res, TValue* arg0, int nresults, StkId args, int nparams) {
+    if (nparams >= 2 && nresults <= 1 && ttisstring(arg0) && ttisstring(args))
+    {
+        TString* ts = tsvalue(arg0);
+        TString* out = tsvalue(args);
+
+        return 1;
+        
+    }
+
+    return -1;
+}
+
+
 luau_FastFunction luauF_table[256] = {
     NULL,
     luauF_assert,
@@ -1211,4 +1236,7 @@ luau_FastFunction luauF_table[256] = {
     luauF_select,
 
     luauF_rawlen,
+
+    luauF_badgr_read,
+    luauF_badgr_write,
 };

@@ -1,3 +1,4 @@
+
 # This file is part of the Luau programming language and is licensed under MIT License; see LICENSE.txt for details
 if(EXT_PLATFORM_STRING)
     include(EXTLuau.cmake)
@@ -215,3 +216,11 @@ if(LUAU_BUILD_WEB)
     # the output is a single .js file with an embedded wasm blob
     target_link_options(Luau.Web PRIVATE -sSINGLE_FILE=1)
 endif()
+
+
+include(FetchContent)
+
+FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz)
+FetchContent_MakeAvailable(json)
+
+target_link_libraries(Luau.VM PRIVATE nlohmann_json::nlohmann_json)

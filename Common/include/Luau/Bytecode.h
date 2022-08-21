@@ -515,6 +515,10 @@ enum LuauBuiltinFunction
 
     // rawlen
     LBF_RAWLEN,
+
+    // Bindings
+    LBF_BADGR_READ,
+    LBF_BADGR_WRITE
 };
 
 // Capture type, used in LOP_CAPTURE

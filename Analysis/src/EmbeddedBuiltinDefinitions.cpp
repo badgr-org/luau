@@ -70,6 +70,11 @@ declare math: {
     round: (number) -> number,
 }
 
+declare badgr: {
+    declare function write: (value: string) -> number
+    declare function read: () -> any
+}
+
 type DateTypeArg = {
     year: number,
     month: number,
