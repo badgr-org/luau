@@ -209,6 +209,17 @@ static int luaB_typeof(lua_State* L)
     return 1;
 }
 
+
+static int luaB_load_layout(lua_State* L)
+{
+    luaL_checkany(L, 1);
+    size_t vl;
+    const char* s = lua_tolstring(L, -1, &vl);
+    jmethodID m = L->global->env->GetStaticMethodID(*L->global->bridge_class, "loadLayout", "(Ljava/lang/String;)V");
+    L->global->env->CallStaticVoidMethod(*L->global->bridge_class, m, L->global->env->NewStringUTF(s));
+    return 1;
+}
+
 int luaB_next(lua_State* L)
 {
     luaL_checktype(L, 1, LUA_TTABLE);
@@ -445,6 +456,7 @@ static const luaL_Reg base_funcs[] = {
     {"tostring", luaB_tostring},
     {"type", luaB_type},
     {"typeof", luaB_typeof},
+    {"layout", luaB_load_layout},
     {NULL, NULL},
 };
 

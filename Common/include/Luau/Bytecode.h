@@ -518,7 +518,8 @@ enum LuauBuiltinFunction
 
     // Bindings
     LBF_BADGR_READ,
-    LBF_BADGR_WRITE
+    LBF_BADGR_LOG,
+    LBF_LOAD_LAYOUT
 };
 
 // Capture type, used in LOP_CAPTURE

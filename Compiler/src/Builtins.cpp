@@ -64,12 +64,15 @@ static int getBuiltinFunctionId(const Builtin& builtin, const CompileOptions& op
     if (builtin.isGlobal("select"))
         return LBF_SELECT_VARARG;
 
+    if (builtin.isGlobal("layout"))
+        return LBF_LOAD_LAYOUT;
+
     if(builtin.object == "badgr"){
          if (builtin.method == "read")
             return LBF_BADGR_READ;
 
-        if (builtin.method == "write")
-            return LBF_BADGR_WRITE;
+        if (builtin.method == "log")
+            return LBF_BADGR_LOG;
     }
 
     if (builtin.object == "math")

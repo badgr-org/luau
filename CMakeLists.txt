@@ -8,11 +8,11 @@ endif()
 cmake_minimum_required(VERSION 3.0)
 
 option(LUAU_BUILD_CLI "Build CLI" ON)
-option(LUAU_BUILD_TESTS "Build tests" ON)
+option(LUAU_BUILD_TESTS "Build tests" OFF)
 option(LUAU_BUILD_WEB "Build Web module" OFF)
 option(LUAU_WERROR "Warnings as errors" OFF)
 option(LUAU_STATIC_CRT "Link with the static CRT (/MT)" OFF)
-option(LUAU_EXTERN_C "Use extern C for all APIs" OFF)
+option(LUAU_EXTERN_C "Use extern C for all APIs" ON)
 
 if(LUAU_STATIC_CRT)
     cmake_minimum_required(VERSION 3.15)
@@ -29,17 +29,21 @@ add_library(Luau.CodeGen STATIC)
 add_library(Luau.VM STATIC)
 add_library(isocline STATIC)
 
+
 if(LUAU_BUILD_CLI)
     add_executable(Luau.Repl.CLI)
     add_executable(Luau.Analyze.CLI)
     add_executable(Luau.Ast.CLI)
     add_executable(Luau.Reduce.CLI)
+    add_library(Luau.Badgr SHARED)
 
     # This also adds target `name` on Linux/macOS and `name.exe` on Windows
     set_target_properties(Luau.Repl.CLI PROPERTIES OUTPUT_NAME luau)
     set_target_properties(Luau.Analyze.CLI PROPERTIES OUTPUT_NAME luau-analyze)
     set_target_properties(Luau.Ast.CLI PROPERTIES OUTPUT_NAME luau-ast)
     set_target_properties(Luau.Reduce.CLI PROPERTIES OUTPUT_NAME luau-reduce)
+    set_target_properties(Luau.Badgr PROPERTIES OUTPUT_NAME luau-badgr)
+
 endif()
 
 if(LUAU_BUILD_TESTS)
@@ -126,6 +130,7 @@ if(LUAU_EXTERN_C)
     target_compile_definitions(Luau.VM PUBLIC LUA_USE_LONGJMP=1)
     target_compile_definitions(Luau.VM PUBLIC LUA_API=extern\"C\")
     target_compile_definitions(Luau.Compiler PUBLIC LUACODE_API=extern\"C\")
+
 endif()
 
 if (MSVC AND MSVC_VERSION GREATER_EQUAL 1924)
@@ -138,6 +143,8 @@ if(MSVC AND LUAU_BUILD_CLI)
     # the default stack size that MSVC linker uses is 1 MB; we need more stack space in Debug because stack frames are larger
     set_target_properties(Luau.Analyze.CLI PROPERTIES LINK_FLAGS_DEBUG /STACK:2097152)
     set_target_properties(Luau.Repl.CLI PROPERTIES LINK_FLAGS_DEBUG /STACK:2097152)
+    set_target_properties(Luau.Badgr PROPERTIES LINK_FLAGS_DEBUG /STACK:2097152)
+
 endif()
 
 # embed .natvis inside the library debug information
@@ -160,10 +167,16 @@ if(LUAU_BUILD_CLI)
     target_compile_options(Luau.Repl.CLI PRIVATE ${LUAU_OPTIONS})
     target_compile_options(Luau.Analyze.CLI PRIVATE ${LUAU_OPTIONS})
     target_compile_options(Luau.Ast.CLI PRIVATE ${LUAU_OPTIONS})
+    target_compile_options(Luau.Badgr PRIVATE ${LUAU_OPTIONS})
+
 
     target_include_directories(Luau.Repl.CLI PRIVATE extern extern/isocline/include)
+    target_include_directories(Luau.Badgr PRIVATE extern extern/isocline/include)
+
 
     target_link_libraries(Luau.Repl.CLI PRIVATE Luau.Compiler Luau.VM isocline)
+    target_link_libraries(Luau.Badgr PRIVATE Luau.Compiler Luau.VM isocline)
+
 
     if(UNIX)
         find_library(LIBPTHREAD pthread)
@@ -179,6 +192,8 @@ if(LUAU_BUILD_CLI)
     target_compile_features(Luau.Reduce.CLI PRIVATE cxx_std_17)
     target_include_directories(Luau.Reduce.CLI PUBLIC Reduce/include)
     target_link_libraries(Luau.Reduce.CLI PRIVATE Luau.Common Luau.Ast Luau.Analysis)
+    target_link_libraries(Luau.Badgr PRIVATE Luau.Common Luau.Ast Luau.Analysis)
+
 endif()
 
 if(LUAU_BUILD_TESTS)

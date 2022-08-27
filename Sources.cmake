@@ -157,7 +157,9 @@ target_sources(Luau.Analysis PRIVATE
     Analysis/src/Unifier.cpp
     Analysis/src/EmbeddedBuiltinDefinitions.cpp
 )
-
+target_include_directories(Luau.Badgr PUBLIC
+VM/src
+VM/include)
 # Luau.VM Sources
 target_sources(Luau.VM PRIVATE
     VM/include/lua.h
@@ -355,4 +357,9 @@ if(TARGET Luau.Reduce.CLI)
         CLI/FileUtils.cpp
         CLI/FileUtils.h
     )
+endif()
+
+if(TARGET Luau.Badgr)
+    target_sources(Luau.Badgr PRIVATE
+        CLI/Badgr.cpp)
 endif()

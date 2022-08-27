@@ -2,8 +2,10 @@
 // This code is based on Lua 5.x implementation licensed under MIT License; see lua_LICENSE.txt for details
 #pragma once
 
+#include <jni.h>
 #include "lobject.h"
 #include "ltm.h"
+
 
 // registry
 #define registry(L) (&L->global->registry)
@@ -209,6 +211,9 @@ typedef struct global_State
 #ifdef LUAI_GCMETRICS
     GCMetrics gcmetrics;
 #endif
+    JNIEnv* env;
+    jobject* bridge;
+    jclass* bridge_class;
 } global_State;
 // clang-format on
 
