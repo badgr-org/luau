@@ -73,6 +73,9 @@ static int getBuiltinFunctionId(const Builtin& builtin, const CompileOptions& op
 
         if (builtin.method == "log")
             return LBF_BADGR_LOG;
+
+        if (builtin.method == "updateView")
+            return LBF_BADGR_UPDATE_VIEW;
     }
 
     if (builtin.object == "math")
