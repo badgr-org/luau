@@ -17,6 +17,16 @@
 
 using json = nlohmann::json;
 
+JNIEnv* getEnv(global_State* g) {
+    JNIEnv *env;
+    g->jvm->AttachCurrentThread(&env, 0);
+    return env;
+}
+
+jclass getBridge(JNIEnv* env) {
+    return  env->FindClass("com/badgr/native/LuaBridge$BadgrBridge");
+}
+
 jobject StlStringStringMapToJavaHashMap(JNIEnv* env, const std::map<std::string, std::string>& map)
 {
     jclass mapClass = env->FindClass("java/util/HashMap");
@@ -48,17 +58,24 @@ jobject StlStringStringMapToJavaHashMap(JNIEnv* env, const std::map<std::string,
 
 
 
-
+static void blog(lua_State* L, const char* s)
+{
+    JNIEnv* env = getEnv(L->global);
+    jclass clazz =getBridge(env);
+    jmethodID m = env->GetStaticMethodID(clazz, "nativeLog", "(Ljava/lang/String;)V");
+    env->CallStaticVoidMethod(clazz, m, env->NewStringUTF(s));
+}
 
 static int luaB_badgr_log(lua_State* L)
 {
     luaL_checkany(L, 1);
     size_t vl;
     const char* s = lua_tolstring(L, -1, &vl);
-    jmethodID m = L->global->env->GetStaticMethodID(*L->global->bridge_class, "nativeLog", "(Ljava/lang/String;)V");
-    L->global->env->CallStaticVoidMethod(*L->global->bridge_class, m, L->global->env->NewStringUTF(s));
+    blog(L, s);
     return 1;
 }
+
+
 
 static int luaB_badgr_read(lua_State* L)
 {
@@ -97,7 +114,8 @@ static int luaB_badgr_updateView(lua_State* L)
         LuaNode* n = &t->node[i];
         if (!ttisnil(gval(n)))
         {
-            if (ttisstring(gkey(n)) && ttisstring(gval(n))){
+            if (ttisstring(gkey(n)) && ttisstring(gval(n)))
+            {
                 std::string key = getstr(tsvalue(gkey(n)));
                 std::string value = getstr(tsvalue(gval(n)));
                 params.insert(std::pair<std::string, std::string>(key, value));
@@ -107,11 +125,23 @@ static int luaB_badgr_updateView(lua_State* L)
 
 
 
- 
 
-    jobject jmap = StlStringStringMapToJavaHashMap(L->global->env, params);
-    jmethodID m = L->global->env->GetStaticMethodID(*L->global->bridge_class, "updateViewObjectParams", "(Ljava/lang/String;Ljava/util/Map;)V");
-    L->global->env->CallStaticVoidMethod(*L->global->bridge_class, m, L->global->env->NewStringUTF(id), jmap);
+    JNIEnv* env = getEnv(L->global);
+    jclass clazz =getBridge(env);
+    jobject jmap = StlStringStringMapToJavaHashMap(env, params);
+    params.clear();
+
+    jmethodID m = env->GetStaticMethodID(clazz, "updateViewObjectParams", "(Ljava/lang/String;Ljava/util/Map;)V");
+    env->CallStaticVoidMethod(clazz, m, env->NewStringUTF(id), jmap);
+    env->DeleteGlobalRef(jmap);
+    return 1;
+}
+
+static int luaB_badgr_setViewOnClickListner(lua_State* L)
+{
+    luaL_checktype(L, 1, LUA_TTHREAD);
+    lua_State* c = lua_tothread(L, -1);
+    L->global->callback_p = c;
     return 1;
 }
 
@@ -120,6 +150,7 @@ static const luaL_Reg badgr_func[] = {
     {"log", luaB_badgr_log},
     {"read", luaB_badgr_read},
     {"updateView", luaB_badgr_updateView},
+    {"setViewOnClick", luaB_badgr_setViewOnClickListner},
     {NULL, NULL},
 };
 
@@ -131,4 +162,3 @@ int luaopen_badgr(lua_State* L)
     luaL_register(L, LUA_BADGRLIBNAME, badgr_func);
     return 1;
 }
-

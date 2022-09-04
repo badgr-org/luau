@@ -215,8 +215,10 @@ static int luaB_load_layout(lua_State* L)
     luaL_checkany(L, 1);
     size_t vl;
     const char* s = lua_tolstring(L, -1, &vl);
-    jmethodID m = L->global->env->GetStaticMethodID(*L->global->bridge_class, "loadLayout", "(Ljava/lang/String;)V");
-    L->global->env->CallStaticVoidMethod(*L->global->bridge_class, m, L->global->env->NewStringUTF(s));
+    JNIEnv *env;
+    L->global->jvm->AttachCurrentThread(&env, 0);
+    jmethodID m = env->GetStaticMethodID(*L->global->bridge_class, "loadLayout", "(Ljava/lang/String;)V");
+    env->CallStaticVoidMethod(*L->global->bridge_class, m, env->NewStringUTF(s));
     return 1;
 }
 

@@ -101,6 +101,8 @@ LUALIB_API void luaL_addlstring(luaL_Buffer* B, const char* s, size_t l);
 LUALIB_API void luaL_addvalue(luaL_Buffer* B);
 LUALIB_API void luaL_pushresult(luaL_Buffer* B);
 LUALIB_API void luaL_pushresultsize(luaL_Buffer* B, size_t size);
+LUALIB_API int coresumey(lua_State* L);
+LUALIB_API int auxresume(lua_State* L, lua_State* co, int narg);
 
 // builtin libraries
 LUALIB_API int luaopen_base(lua_State* L);

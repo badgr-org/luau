@@ -40,7 +40,7 @@ static int costatus(lua_State* L)
     return 1;
 }
 
-static int auxresume(lua_State* L, lua_State* co, int narg)
+ int auxresume(lua_State* L, lua_State* co, int narg)
 {
     // error handling for edge cases
     if (co->status != LUA_YIELD)
@@ -129,7 +129,7 @@ static int coresumefinish(lua_State* L, int r)
     }
 }
 
-static int coresumey(lua_State* L)
+int coresumey(lua_State* L)
 {
     lua_State* co = lua_tothread(L, 1);
     luaL_argexpected(L, co, 1, "thread");

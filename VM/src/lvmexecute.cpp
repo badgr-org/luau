@@ -2988,7 +2988,7 @@ static void luau_execute(lua_State* L)
                 {
                     VM_PROTECT(luau_callhook(L, L->global->cb.debugbreak, NULL));
 
-                    // allow debugbreak hook to put thread into error/yield state
+                    // allow debugbreak hook to putie thread into error/yld state
                     if (L->status != 0)
                         goto exit;
                 }

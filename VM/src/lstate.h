@@ -211,9 +211,12 @@ typedef struct global_State
 #ifdef LUAI_GCMETRICS
     GCMetrics gcmetrics;
 #endif
-    JNIEnv* env;
+    JavaVM  *jvm;
     jobject* bridge;
     jclass* bridge_class;
+
+    lua_State* callback_p;
+
 } global_State;
 // clang-format on
 
@@ -293,3 +296,4 @@ union GCObject
 
 LUAI_FUNC lua_State* luaE_newthread(lua_State* L);
 LUAI_FUNC void luaE_freethread(lua_State* L, lua_State* L1, struct lua_Page* page);
+

@@ -1,11 +1,29 @@
 #include "lua.h"
 #include "lualib.h"
 #include "luacode.h"
+#include "lgc.h"
 #include "lstate.h"
 #include <jni.h>
 #include <cstdlib>
 #include <memory>
 #include <string>
+#include <lfunc.h>
+#include <thread>
+
+lua_State* L;
+
+void attachThreadToVM(JNIEnv* env) {
+    JavaVM* g_vm;
+    env->GetJavaVM(&g_vm);
+    JNIEnv * g_env;
+
+    int getEnvStat = g_vm->GetEnv((void **)&g_env, JNI_VERSION_1_6);
+    if (getEnvStat == JNI_EDETACHED) {
+        if (g_vm->AttachCurrentThread( &g_env, NULL) != 0) {
+            abort();
+        }
+    }
+}
 
 int runCode(lua_State* L, char* source)
 {
@@ -60,6 +78,7 @@ extern "C" JNIEXPORT void JNICALL Java_com_badgr_native_LuaBridge_startVMandAtta
 {
     
     jclass thisClass = env->GetObjectClass(bridge);
+    env->NewGlobalRef(bridge);
 
     jbyte* carr;
     carr = env->GetByteArrayElements( bytecode, NULL);
@@ -74,17 +93,36 @@ extern "C" JNIEXPORT void JNICALL Java_com_badgr_native_LuaBridge_startVMandAtta
     luaL_openlibs(GL);
     luaL_sandbox(GL);
     size_t bytecodeSize = env->GetArrayLength(bytecode );
-    lua_State* L = lua_newthread(GL);
-    L->global->env = env;
+    L = lua_newthread(GL);
+    JavaVM  *jvm;
+
+    env->GetJavaVM(&jvm);
+    L->global->jvm =jvm;
     L->global->bridge_class = &thisClass;
     L->global->bridge = &bridge;
 
     // new thread needs to have the globals sandboxed
     luaL_sandboxthread(L);
-    runCode(L, (char*)carr);
+    runCode( L, (char*)carr);
     // lua_resume(L, NULL, 0);
     env->ReleaseByteArrayElements(bytecode, carr, 0);
-
 }
 
+
+
+extern "C" JNIEXPORT void JNICALL Java_com_badgr_native_LuaBridge_triggerOnClickFunctionForView(JNIEnv *env, jobject thiz, jstring view_id) {
+
+
+    const char *viewId = env->GetStringUTFChars(view_id, 0);
+    global_State* G = L->global;
+    lua_State* r = G->callback_p;
+    attachThreadToVM(env);
+    if (r == NULL) return;
+
+    lua_State* Ln = lua_newthread(L);
+    lua_pushstring(Ln, viewId);
+    auxresume(Ln, r, 1);
+
+//     env->ReleaseStringUTFChars(view_id, viewId);
+}
 
